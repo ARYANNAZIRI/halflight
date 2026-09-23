@@ -6,7 +6,10 @@ import UIKit
 @MainActor
 struct MediaStoreTests {
     private func sampleJPEG() -> Data {
-        let renderer = UIGraphicsImageRenderer(size: CGSize(width: 64, height: 48))
+        // Scale 1 so pixel dimensions match points regardless of the simulator's screen scale.
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: 64, height: 48), format: format)
         let image = renderer.image { context in
             UIColor.orange.setFill()
             context.fill(CGRect(x: 0, y: 0, width: 64, height: 48))
@@ -52,8 +55,6 @@ struct MediaStoreTests {
 
         store.delete(item)
         #expect(store.items.isEmpty)
-        // File removal is detached; give it a moment.
-        try await Task.sleep(for: .milliseconds(300))
         #expect(!FileManager.default.fileExists(atPath: file.path))
     }
 

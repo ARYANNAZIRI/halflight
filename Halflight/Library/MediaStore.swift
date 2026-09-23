@@ -150,12 +150,9 @@ final class MediaStore {
     func delete(_ item: MediaItem) {
         items.removeAll { $0.id == item.id }
         thumbCache.removeObject(forKey: item.id.uuidString as NSString)
-        let file = fileURL(for: item)
-        let thumb = thumbURL(for: item)
-        Task.detached(priority: .utility) {
-            try? FileManager.default.removeItem(at: file)
-            try? FileManager.default.removeItem(at: thumb)
-        }
+        // Unlinking a local file is immediate; doing it inline keeps Roll and disk in step.
+        try? FileManager.default.removeItem(at: fileURL(for: item))
+        try? FileManager.default.removeItem(at: thumbURL(for: item))
         persist()
     }
 
