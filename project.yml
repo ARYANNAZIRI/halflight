@@ -1,0 +1,91 @@
+# Halflight — XcodeGen project spec.
+# Generate the Xcode project with:  brew install xcodegen && xcodegen generate
+name: Halflight
+options:
+  bundleIdPrefix: app.halflight
+  deploymentTarget:
+    iOS: "27.1"
+  xcodeVersion: "27.1"
+  createIntermediateGroups: true
+  generateEmptyDirectories: true
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    SWIFT_UPCOMING_FEATURE_EXISTENTIAL_ANY: YES
+    IPHONEOS_DEPLOYMENT_TARGET: "27.1"
+    TARGETED_DEVICE_FAMILY: "1"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    # Set HALFLIGHT_DUO_CONDITIONS to "HALFLIGHT_DUO_SDK" once the iOS 27.1 Duo headers
+    # (CameraCaptureAccessory, onHingeChange, AVCaptureDeviceDirectionCoordinator) are
+    # confirmed in your SDK. Everything Duo-specific lives in Halflight/DuoBridge and
+    # degrades to stubs while the flag is off, so the app builds on any iOS 27.1 SDK.
+    HALFLIGHT_DUO_CONDITIONS: ""
+    SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) $(HALFLIGHT_DUO_CONDITIONS)"
+  configs:
+    Debug:
+      SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) DEBUG $(HALFLIGHT_DUO_CONDITIONS)"
+
+targets:
+  Halflight:
+    type: application
+    platform: iOS
+    sources:
+      - path: Halflight
+    info:
+      path: Halflight/Resources/Info.plist
+      properties:
+        CFBundleDisplayName: Halflight
+        CFBundleName: Halflight
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UILaunchScreen: {}
+        UIUserInterfaceStyle: Dark
+        UIRequiresFullScreen: false
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: true
+        NSCameraUsageDescription: Halflight needs the camera to show a viewfinder and take photos and video.
+        NSMicrophoneUsageDescription: Halflight records sound with your videos. Photos never use the microphone.
+        NSPhotoLibraryAddUsageDescription: Halflight saves the shots you choose to your Photos library. It never reads your library.
+        ITSAppUsesNonExemptEncryption: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.halflight.duo
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        GENERATE_INFOPLIST_FILE: NO
+        STRING_CATALOG_GENERATE_SYMBOLS: NO
+
+  HalflightTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: HalflightTests
+    dependencies:
+      - target: Halflight
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.halflight.duo.tests
+
+schemes:
+  Halflight:
+    build:
+      targets:
+        Halflight: all
+        HalflightTests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - HalflightTests
+    archive:
+      config: Release
