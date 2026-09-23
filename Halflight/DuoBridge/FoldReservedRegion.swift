@@ -2,7 +2,9 @@ import SwiftUI
 
 /// Keeps interactive controls out of the crease while the phone is partially open.
 /// System components already avoid the fold on Duo; this covers Halflight's custom chrome.
-/// The real reserved-region API, when confirmed, plugs in behind the SDK flag.
+/// iOS 27.1 exposes reserved regions on UIKit views (`UIView.ReservedRegion`, `reservedRegions`,
+/// `UIView.LayoutRegion.bar(onEdge:extent:)`); Halflight's chrome is SwiftUI, so this geometry
+/// stays until a SwiftUI equivalent is confirmed.
 struct CreaseAvoiding: ViewModifier {
     let posture: DevicePosture
     /// Fraction of the pane's width reserved around the crease.

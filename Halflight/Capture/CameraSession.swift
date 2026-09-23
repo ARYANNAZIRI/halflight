@@ -169,6 +169,27 @@ actor CameraSession {
 
     // MARK: Lens, mode, zoom
 
+    /// Duo flips: while the user has "Front" selected, keep the input on whichever camera now
+    /// faces the subject. Returns true when the input changed.
+    @discardableResult
+    func applyDirections(_ directions: CameraDirections) throws -> Bool {
+        guard lens == .front, let current = videoInput?.device else { return false }
+        guard !directions.forwardFacingIDs.isEmpty, !directions.forwardFacingIDs.contains(current.uniqueID) else { return false }
+        guard let replacement = directions.forwardFacingIDs.lazy.compactMap({ AVCaptureDevice(uniqueID: $0) }).first else { return false }
+        session.beginConfiguration()
+        defer { session.commitConfiguration() }
+        let input = try AVCaptureDeviceInput(device: replacement)
+        guard session.canAddInput(input) else { throw CameraError.cannotAddInput }
+        if let old = videoInput { session.removeInput(old) }
+        session.addInput(input)
+        videoInput = input
+        rotation = AVCaptureDevice.RotationCoordinator(device: replacement, previewLayer: nil)
+        mainSwitchOver = 1
+        configureDeviceDefaults(replacement)
+        updateCapabilities(for: replacement)
+        return true
+    }
+
     /// Returns the display zoom after the switch (1 = main, ultraWideZoom = ultra wide).
     @discardableResult
     func setLens(_ requested: Lens) throws -> CGFloat {

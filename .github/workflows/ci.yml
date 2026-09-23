@@ -39,6 +39,9 @@ jobs:
           # runner's simulators and the code still gets type-checked and unit-tested.
           if [ "$(printf '%s\n27.1\n' "$SDK" | sort -V | head -1)" = "27.1" ]; then
             DT=27.1
+            # A Duo-capable SDK: compile the real Duo API path too.
+            sed -i '' 's/HALFLIGHT_DUO_CONDITIONS: ""/HALFLIGHT_DUO_CONDITIONS: "HALFLIGHT_DUO_SDK"/' project.yml
+            echo "Duo SDK path enabled for this build."
           else
             DT="$SDK"
             echo "::warning::Runner SDK is iOS $SDK; lowering the deployment target to $SDK for this build only."

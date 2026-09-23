@@ -70,6 +70,29 @@ final class HingeObserver {
 
     // MARK: Inputs
 
+    /// High-level hinge status as iOS 27.1 reports it.
+    enum HingeStatus: Sendable {
+        case closed, partiallyOpen, fullyOpen
+    }
+
+    /// Preferred input on Duo: the system's status plus the continuous angle.
+    /// `partiallyOpen` is split into book / tent by angle; the other two are taken as given.
+    func reportHinge(status: HingeStatus, angle newAngle: Double) {
+        #if DEBUG
+        if fake.enabled { return }
+        #endif
+        hingeReported = true
+        angle = newAngle
+        let next: DevicePosture
+        switch status {
+        case .closed: next = .closed
+        case .fullyOpen: next = .open
+        case .partiallyOpen: next = DevicePosture.tentRange.contains(newAngle) ? .tent : .book
+        }
+        if next != posture { posture = next }
+    }
+
+    /// Angle-only input (tests, and devices that report no status).
     func reportHinge(angle newAngle: Double) {
         #if DEBUG
         if fake.enabled { return }
@@ -111,9 +134,19 @@ struct HingeReporting: ViewModifier {
 
     func body(content: Content) -> some View {
         #if HALFLIGHT_DUO_SDK
-        // iOS 27.1 Duo API. Confirm the closure signature against the SDK header before shipping.
-        content.onHingeChange { change in
-            hinge.reportHinge(angle: change.angle)
+        // iOS 27.1: the closure receives (previous, current) contexts; `context.hinge` is nil on
+        // devices without a hinge. Shape confirmed from Apple's "Leverage multiple displays and
+        // scenes on iPhone Duo" Tech Talk; the status enum spelling is checked against the SDK.
+        content.onHingeChange { _, context in
+            guard let deviceHinge = context.hinge else { return }
+            let status: HingeObserver.HingeStatus
+            switch deviceHinge.status {
+            case .closed: status = .closed
+            case .partiallyOpen: status = .partiallyOpen
+            case .fullyOpen: status = .fullyOpen
+            @unknown default: status = .fullyOpen
+            }
+            hinge.reportHinge(status: status, angle: deviceHinge.angle.degrees)
         }
         #else
         content

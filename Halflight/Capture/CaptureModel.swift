@@ -273,6 +273,17 @@ final class CaptureModel {
         setLens(lens == .front ? .main : .front)
     }
 
+    /// Duo: the preview view reports which cameras face the subject as the phone flips.
+    func directionsChanged(_ directions: CameraDirections) {
+        Task { [self] in
+            if (try? await session.applyDirections(directions)) == true {
+                previewSource = await session.previewSource()
+                capabilities = await session.capabilities
+                await updateHintTap()
+            }
+        }
+    }
+
     func setZoom(_ display: CGFloat) {
         Task { [self] in
             let applied = await session.setZoom(display: display)

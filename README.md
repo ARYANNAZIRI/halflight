@@ -37,13 +37,17 @@ All iPhone Duo APIs live in `Halflight/DuoBridge/` behind the `HALFLIGHT_DUO_SDK
 condition. With the flag off (the default), the app compiles against any iOS 27.1 SDK and every
 Duo feature degrades cleanly:
 
-| API (iOS 27.1) | File | Off-flag behaviour |
-| --- | --- | --- |
-| `CameraCaptureAccessory` + `.sceneAccessory`, `.onAvailabilityChange` | `DuoBridge/FacingAccessory.swift` | No accessory. FakeDuo overlay pane stands in. |
-| `onHingeChange` / `UIHingeInteraction` | `DuoBridge/HingeObserver.swift` | No hinge reports; `isDuo` stays false unless FakeDuo is on. |
-| `AVCaptureDeviceDirectionCoordinator` | `DuoBridge/DirectionCoordinator.swift` | Front camera from `AVCaptureDeviceDiscoverySession(position: .front)`, which already resolves to the virtual front camera on Duo. |
-| Reserved regions around the fold | `DuoBridge/FoldReservedRegion.swift` | Halflight's own crease-avoidance: primary controls stay out of the middle third while partially open. |
-| Split View / multiple scenes | `Info.plist` (`UIApplicationSupportsMultipleScenes`) + size classes | Layout is driven by size class, so 50/50 Split View just works. |
+| API (iOS 27.1) | Status | File | Off-flag behaviour |
+| --- | --- | --- | --- |
+| `.sceneAccessory { CameraCaptureAccessory(isEnabled:) { … }.onAvailabilityChange { … } }` | Confirmed (Tech Talk) | `DuoBridge/FacingAccessory.swift` | No accessory. FakeDuo overlay pane stands in. |
+| `.onHingeChange { _, context in context.hinge?.status / .angle }` | Confirmed (Tech Talk) | `DuoBridge/HingeObserver.swift` | No hinge reports; `isDuo` stays false unless FakeDuo is on. |
+| `AVCaptureDeviceDirectionCoordinator(view:deviceTypes:changeHandler:)` (AVKit) | Confirmed; descriptor accessor to verify | `DuoBridge/DirectionCoordinator.swift` | Front camera from `AVCaptureDeviceDiscoverySession(position: .front)`, which resolves to the virtual front camera on Duo. |
+| Reserved regions (`UIView.ReservedRegion`, `reservedRegions`) | Confirmed, UIKit only | `DuoBridge/FoldReservedRegion.swift` | Halflight's own crease-avoidance: primary controls stay out of the middle third while partially open. |
+| Split View / multiple scenes | Size classes | `Info.plist` (`UIApplicationSupportsMultipleScenes`) | Layout is driven by size class, so 50/50 Split View just works. |
+
+Sources: Apple Tech Talks "Leverage multiple displays and scenes on iPhone Duo" and "Build a great
+camera experience for iPhone Duo" (September 2026). CI enables the flag automatically once the
+runner ships an iOS 27.1 SDK; until then only the off-flag path is compiled there.
 
 To turn the real APIs on once the headers are confirmed, set in `project.yml`:
 

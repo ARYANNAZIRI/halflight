@@ -457,9 +457,15 @@ struct ViewfinderView: View {
                 CameraFailedView(message: message) { model.retry() }
             default:
                 if let source = model.previewSource {
-                    CameraPreviewView(source: source) { viewPoint, devicePoint in
-                        model.focus(viewPoint: viewPoint, devicePoint: devicePoint)
-                    }
+                    CameraPreviewView(
+                        source: source,
+                        onTap: { viewPoint, devicePoint in
+                            model.focus(viewPoint: viewPoint, devicePoint: devicePoint)
+                        },
+                        onDirectionsChange: { directions in
+                            model.directionsChanged(directions)
+                        }
+                    )
                 } else {
                     Color.black
                     ProgressView().tint(Theme.inkMuted)

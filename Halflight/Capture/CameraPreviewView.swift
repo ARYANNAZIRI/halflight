@@ -9,11 +9,18 @@ struct CameraPreviewView: UIViewRepresentable {
     var mirrored = false
     /// Called with the tap location in view coordinates and in capture-device coordinates (0...1).
     var onTap: ((CGPoint, CGPoint) -> Void)? = nil
+    /// Duo only: which cameras face the subject relative to this view. No-op without the SDK flag.
+    var onDirectionsChange: (@MainActor (CameraDirections) -> Void)? = nil
 
     func makeUIView(context: Context) -> PreviewUIView {
         let view = PreviewUIView()
         view.attach(source, mirrored: mirrored)
         view.onTap = onTap
+        #if HALFLIGHT_DUO_SDK
+        if let onDirectionsChange {
+            view.directionObserver = SubjectDirectionObserver(view: view, onChange: onDirectionsChange)
+        }
+        #endif
         return view
     }
 
@@ -36,6 +43,9 @@ final class PreviewUIView: UIView {
     private var rotation: AVCaptureDevice.RotationCoordinator?
     private var observation: NSKeyValueObservation?
     private var attachedDeviceID: String?
+    #if HALFLIGHT_DUO_SDK
+    var directionObserver: SubjectDirectionObserver?
+    #endif
 
     override init(frame: CGRect) {
         super.init(frame: frame)
