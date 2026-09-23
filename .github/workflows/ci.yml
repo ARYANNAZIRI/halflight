@@ -29,21 +29,21 @@ jobs:
       - name: Install XcodeGen
         run: brew install xcodegen
 
-      - name: Generate project
-        run: xcodegen generate
-
       - name: Resolve simulator and deployment target
         id: sim
         run: |
           set -euo pipefail
           SDK=$(xcrun --sdk iphonesimulator --show-sdk-version)
-          # The app targets iOS 27.1. Until the runner ships that SDK, compile against the
-          # newest SDK it has so the code still gets type-checked and unit-tested.
+          # The app targets iOS 27.1. Until the runner ships that SDK, lower the deployment
+          # target in the generated project (never committed) so xcodebuild accepts the
+          # runner's simulators and the code still gets type-checked and unit-tested.
           if [ "$(printf '%s\n27.1\n' "$SDK" | sort -V | head -1)" = "27.1" ]; then
             DT=27.1
           else
             DT="$SDK"
-            echo "::warning::Runner SDK is iOS $SDK; overriding deployment target to $SDK for this build only."
+            echo "::warning::Runner SDK is iOS $SDK; lowering the deployment target to $SDK for this build only."
+            sed -i '' "s/\"27\.1\"/\"$DT\"/g" project.yml
+            grep -n "$DT" project.yml
           fi
           echo "deployment_target=$DT" >> "$GITHUB_OUTPUT"
           xcrun simctl list devices available
@@ -62,6 +62,11 @@ jobs:
           if [ -z "$UDID" ]; then echo "No iPhone simulator available"; exit 1; fi
           echo "udid=$UDID" >> "$GITHUB_OUTPUT"
           echo "Using simulator $UDID with deployment target $DT"
+
+      - name: Generate project
+        run: |
+          xcodegen generate
+          xcodebuild -project Halflight.xcodeproj -scheme Halflight -showdestinations 2>/dev/null | grep "iOS Simulator" | head -5
 
       - name: Build
         run: |
