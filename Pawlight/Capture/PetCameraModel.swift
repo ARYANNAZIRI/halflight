@@ -43,6 +43,12 @@ final class PetCameraModel {
     /// Shots taken by Catch this session, shown as a small counter.
     private(set) var catches = 0
 
+    #if DEBUG
+    /// Screenshot mode (Settings → Developer): a chosen photo stands in for the viewfinder and
+    /// the badge shows "Looking!", because the simulator has no camera.
+    var demoImage: UIImage?
+    #endif
+
     @ObservationIgnored private var evaluator = PetLookEvaluator()
     @ObservationIgnored private var lastCatch: Date?
     @ObservationIgnored private var lastActivity = Date.now
@@ -66,6 +72,17 @@ final class PetCameraModel {
     var lureAvailable: Bool { hinge.facingAvailable && lens != .front }
     var lureIsLive: Bool { lureOn && lureAvailable }
     var lure: Lure { settings.lure }
+
+    var isDemo: Bool {
+        #if DEBUG
+        return demoImage != nil
+        #else
+        return false
+        #endif
+    }
+
+    /// What the UI shows: the real look, or "Looking!" in screenshot mode.
+    var shownLook: PetLook { isDemo ? .looking : look }
 
     /// Pro takes a burst per catch; free takes one shot.
     var shotsPerCatch: Int { pro.isPro ? settings.shotsPerCatch : 1 }

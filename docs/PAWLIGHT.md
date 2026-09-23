@@ -40,16 +40,12 @@ and attach it to the first build for review. `StoreKit/Pawlight.storekit` lets t
 scheme test purchases in the simulator without App Store Connect. Settings → Developer →
 *Pretend Pro* (DEBUG) unlocks everything for screenshots.
 
-## Listing draft
+## Listing
 
-- **Name:** Pawlight: Pet Camera
-- **Subtitle:** Lures and sounds for the shot
-- **Keywords:** pet,dog,cat,camera,photo,puppy,kitten,treat,squeaky,portrait,foldable,duo
-- **Promo:** On iPhone Duo, a lure plays on the outer screen, facing your pet. Pawlight takes the shot when they look.
-- **Description (first lines):** Getting a pet to look at the camera is the hard part. Pawlight
-  squeaks, chirps and crinkles to get their attention, and on iPhone Duo it plays a moving lure on
-  the outer screen, right under the lens. The moment your cat or dog looks at the camera, Pawlight
-  takes the shot for you.
+The App Store text lives in `fastlane/pawlight/metadata/` (name "Pawlight: Pet Camera", subtitle
+"Lures and sounds for the shot", description, keywords, promo text, categories Photo & Video /
+Lifestyle, review notes). The landing, privacy and support pages are `docs/pawlight/`, served by the
+same GitHub Pages site as Halflight's.
 
 ## Test plan
 
@@ -63,9 +59,36 @@ scheme test purchases in the simulator without App Store Connect. Settings → D
 - [ ] Roll: grid, detail, Save to Photos (add-only permission), Share, Delete.
 - [ ] Camera denied: message and Open Settings; no crash.
 
-## Before submitting
+## Screenshots without a pet
 
-- [ ] Real app icon (the committed one is a placeholder paw).
-- [ ] Screenshots from the Duo simulator: outer lure + inner viewfinder, "Looking!" moment, sound pad.
-- [ ] Confirm the Duo header names once more (see the TODO(duo) comments in Halflight's DuoBridge).
-- [ ] Privacy nutrition label: Data Not Collected. Privacy manifest: `Pawlight/Resources/PrivacyInfo.xcprivacy`.
+The simulator has no camera. In a DEBUG build, Settings → Developer → *Screenshot mode: pick a pet
+photo* puts any photo in the viewfinder with the "Looking!" badge. Add *Simulate iPhone Duo* and
+*Show outer display as overlay* to show a lure next to it, and *Pretend Pro* to unlock every lure.
+
+## App Store Connect checklist
+
+Your Apple account is needed from here; the Developer Program, API key and GitHub secrets from
+Halflight's `docs/APP_STORE.md` are reused as they are.
+
+1. **App ID:** Identifiers → **+** → App IDs → explicit `app.halflight.pawlight`, description
+   "Pawlight". In-App Purchase is on by default.
+2. **App record:** My Apps → **+** → New App: iOS, name **Pawlight: Pet Camera**, English (U.S.),
+   bundle ID `app.halflight.pawlight`, SKU `pawlight-ios`.
+3. **In-app purchase:** the app → Monetization → In-App Purchases → **+** → Non-Consumable.
+   Reference name "Pawlight Pro", product ID `app.halflight.pawlight.pro`, price $4.99,
+   Family Sharing on. Display name "Pawlight Pro", description "Every lure and sound, and up to 5
+   shots per catch." Add a review screenshot of the paywall (Settings → See what Pro unlocks).
+4. **Listing text:** `fastlane ios pawlight_metadata` (same env vars as Halflight's `metadata` lane).
+5. **First build:** `fastlane ios pawlight_beta` from your Mac with Xcode 27.1. Once GitHub runners
+   have it: Actions → TestFlight → Run workflow → app **pawlight**, or push a `pawlight-v0.1.0` tag.
+6. **App Privacy:** Data Not Collected. **Age rating:** 4+. **Price:** Free.
+7. **Version page:** screenshots (6.9-inch set; the Duo set when App Store Connect offers it), pick
+   the build, and attach the Pawlight Pro purchase under "In-App Purchases and Subscriptions" so it
+   is reviewed with the build. Release manually, to time it for October 23.
+8. **Submit** by October 14 so review clears before pre-orders open on October 16.
+
+Still open before submitting:
+
+- [ ] Build and run on Xcode 27.1 with the Duo SDK flag on; confirm the `TODO(duo)` names.
+- [ ] Try Catch on a real pet.
+- [ ] Final app icon (the committed one is a placeholder paw).

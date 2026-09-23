@@ -1,3 +1,4 @@
+import PhotosUI
 import SwiftUI
 
 struct PawSettingsView: View {
@@ -74,11 +75,22 @@ struct PawSettingsView: View {
 /// FakeDuo and a Pro override, so every state runs on a plain simulator.
 private struct DeveloperSection: View {
     @Environment(PawState.self) private var app
+    @State private var screenshotPick: PhotosPickerItem?
 
     var body: some View {
         let hinge = app.hinge
         let settings = app.settings
+        let camera = app.camera
         Section("Developer") {
+            PhotosPicker(selection: $screenshotPick, matching: .images) {
+                Text(camera.demoImage == nil ? "Screenshot mode: pick a pet photo" : "Screenshot mode: change photo")
+            }
+            if camera.demoImage != nil {
+                Button("Turn off screenshot mode", role: .destructive) {
+                    camera.demoImage = nil
+                    screenshotPick = nil
+                }
+            }
             Toggle("Simulate iPhone Duo", isOn: Binding(get: { hinge.fake.enabled }, set: { hinge.fake.enabled = $0 }))
             if hinge.fake.enabled {
                 Picker("Posture", selection: Binding(get: { hinge.fake.posture }, set: { hinge.fake.posture = $0 })) {
@@ -90,6 +102,14 @@ private struct DeveloperSection: View {
                 Toggle("Show outer display as overlay", isOn: Binding(get: { hinge.fake.showFacingOverlay }, set: { hinge.fake.showFacingOverlay = $0 }))
             }
             Toggle("Pretend Pro", isOn: Binding(get: { settings.values.pretendPro }, set: { settings.values.pretendPro = $0 }))
+        }
+        .onChange(of: screenshotPick) { _, item in
+            guard let item else { return }
+            Task {
+                if let data = try? await item.loadTransferable(type: Data.self), let image = UIImage(data: data) {
+                    camera.demoImage = image
+                }
+            }
         }
     }
 }

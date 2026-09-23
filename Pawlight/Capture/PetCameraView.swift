@@ -147,29 +147,18 @@ struct PetViewfinder: View {
 
     var body: some View {
         ZStack {
-            switch model.status {
-            case .unauthorized:
-                CameraMessage(
-                    symbol: "camera.fill",
-                    title: "Camera access is off",
-                    message: "Allow camera access in Settings to take pet photos.",
-                    button: "Open Settings",
-                    action: { Permissions.openSystemSettings() }
-                )
-            case .failed(let message):
-                CameraMessage(symbol: "exclamationmark.triangle", title: "The camera stopped", verbatim: message,
-                              button: "Try again", action: { model.retry() })
-            default:
-                if let source = model.previewSource {
-                    CameraPreviewView(
-                        source: source,
-                        onTap: { _, devicePoint in model.focus(devicePoint: devicePoint) },
-                        onDirectionsChange: { model.directionsChanged($0) }
-                    )
-                } else {
-                    Color.black
+            #if DEBUG
+            if let demo = model.demoImage {
+                // Screenshot mode: the simulator has no camera.
+                Color.black.overlay {
+                    Image(uiImage: demo).resizable().scaledToFill()
                 }
+            } else {
+                cameraLayer
             }
+            #else
+            cameraLayer
+            #endif
 
             VStack {
                 LookBadge(model: model)
@@ -198,10 +187,36 @@ struct PetViewfinder: View {
         .clipShape(RoundedRectangle(cornerRadius: Theme.radius, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: Theme.radius, style: .continuous)
-                .stroke(model.look == .looking ? Theme.ready : .clear, lineWidth: 3)
+                .stroke(model.shownLook == .looking ? Theme.ready : .clear, lineWidth: 3)
         )
-        .animation(Theme.quick, value: model.look)
+        .animation(Theme.quick, value: model.shownLook)
         .animation(Theme.quick, value: model.toast)
+    }
+
+    @ViewBuilder private var cameraLayer: some View {
+        switch model.status {
+        case .unauthorized:
+            CameraMessage(
+                symbol: "camera.fill",
+                title: "Camera access is off",
+                message: "Allow camera access in Settings to take pet photos.",
+                button: "Open Settings",
+                action: { Permissions.openSystemSettings() }
+            )
+        case .failed(let message):
+            CameraMessage(symbol: "exclamationmark.triangle", title: "The camera stopped", verbatim: message,
+                          button: "Try again", action: { model.retry() })
+        default:
+            if let source = model.previewSource {
+                CameraPreviewView(
+                    source: source,
+                    onTap: { _, devicePoint in model.focus(devicePoint: devicePoint) },
+                    onDirectionsChange: { model.directionsChanged($0) }
+                )
+            } else {
+                Color.black
+            }
+        }
     }
 }
 
@@ -258,22 +273,22 @@ struct LookBadge: View {
     let model: PetCameraModel
 
     var body: some View {
-        if model.isRunning {
+        if model.isRunning || model.isDemo {
             HStack(spacing: 6) {
-                Image(systemName: model.look == .looking ? "eye.fill" : "pawprint.fill")
+                Image(systemName: model.shownLook == .looking ? "eye.fill" : "pawprint.fill")
                 Text(title)
             }
             .font(.system(size: 14, weight: .semibold))
-            .foregroundStyle(model.look == .looking ? Color.black : Theme.ink)
+            .foregroundStyle(model.shownLook == .looking ? Color.black : Theme.ink)
             .padding(.horizontal, 12)
             .padding(.vertical, 7)
-            .background(Capsule().fill(model.look == .looking ? Theme.ready : Color.black.opacity(0.55)))
+            .background(Capsule().fill(model.shownLook == .looking ? Theme.ready : Color.black.opacity(0.55)))
             .accessibilityElement(children: .combine)
         }
     }
 
     private var title: LocalizedStringKey {
-        switch model.look {
+        switch model.shownLook {
         case .looking: return "Looking!"
         case .seen:
             switch model.species {
@@ -472,7 +487,7 @@ struct PetShutterButton: View {
                     .stroke(Theme.ink, lineWidth: 4)
                     .frame(width: Theme.shutterSize, height: Theme.shutterSize)
                 Circle()
-                    .fill(model.look == .looking ? Theme.ready : Theme.ink)
+                    .fill(model.shownLook == .looking ? Theme.ready : Theme.ink)
                     .frame(width: Theme.shutterSize * 0.78, height: Theme.shutterSize * 0.78)
                 if model.isCapturing {
                     ProgressView().tint(.black)

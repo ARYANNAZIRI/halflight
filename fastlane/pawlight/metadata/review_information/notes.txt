@@ -1,0 +1,11 @@
+No account or sign-in is needed. Everything runs on device.
+
+How to test:
+1. Allow camera access. The camera opens immediately.
+2. Point the camera at a cat or dog. A photo of a cat or dog on another screen works too. The badge changes from "Looking for a pet" to "Dog spotted" / "Cat spotted", then "Looking!" when the animal faces the lens, and Catch takes the photo automatically.
+3. Tap a sound (Squeak or Kiss are free) to hear it through the speaker.
+4. Lures appear on the outer display only on iPhone Duo, with the phone open and the rear camera active ("Lure" button at the top). On other iPhones the button is hidden and everything else works.
+
+In-app purchase: "Pawlight Pro" (app.halflight.pawlight.pro), a non-consumable. Tap any locked lure or sound, or Settings > See what Pro unlocks. Restore Purchases is on the same screen and in Settings.
+
+Photos permission is add-only and requested only when the user saves a shot.
