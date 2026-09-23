@@ -9,6 +9,10 @@ options:
   createIntermediateGroups: true
   generateEmptyDirectories: true
 
+# Local StoreKit config for Pawlight's in-app purchase (used by the Pawlight scheme's Run action).
+fileGroups:
+  - StoreKit
+
 settings:
   base:
     SWIFT_VERSION: "6.0"
@@ -74,6 +78,67 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.halflight.duo.tests
 
+  # Pawlight: the pet camera. Its own code lives in Pawlight/; the files listed below are
+  # Halflight's, compiled into both apps unchanged. Pawlight supplies its own Theme and AlertItem.
+  Pawlight:
+    type: application
+    platform: iOS
+    sources:
+      - path: Pawlight
+      - path: Halflight/Capture/CameraSession.swift
+      - path: Halflight/Capture/CameraPreviewView.swift
+      - path: Halflight/Capture/CaptureEventHost.swift
+      - path: Halflight/Capture/StillHint.swift
+      - path: Halflight/DuoBridge/DirectionCoordinator.swift
+      - path: Halflight/DuoBridge/DuoCapabilities.swift
+      - path: Halflight/DuoBridge/FoldReservedRegion.swift
+      - path: Halflight/DuoBridge/HingeObserver.swift
+      - path: Halflight/Library/MediaItem.swift
+      - path: Halflight/Library/MediaStore.swift
+      - path: Halflight/Support/Haptics.swift
+      - path: Halflight/Support/Permissions.swift
+      - path: Halflight/Support/PhotoLibrarySaver.swift
+      - path: Halflight/Support/StorageMonitor.swift
+      - path: Halflight/App/EventLog.swift
+    info:
+      path: Pawlight/Resources/Info.plist
+      properties:
+        CFBundleDisplayName: Pawlight
+        CFBundleName: Pawlight
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UILaunchScreen: {}
+        UIUserInterfaceStyle: Dark
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: true
+        NSCameraUsageDescription: Pawlight needs the camera to see your pet and take photos.
+        NSPhotoLibraryAddUsageDescription: Pawlight saves the photos you choose to your Photos library. It never reads your library.
+        ITSAppUsesNonExemptEncryption: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.halflight.pawlight
+        MARKETING_VERSION: "0.1.0"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        GENERATE_INFOPLIST_FILE: NO
+        STRING_CATALOG_GENERATE_SYMBOLS: NO
+
+  PawlightTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: PawlightTests
+    dependencies:
+      - target: Pawlight
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.halflight.pawlight.tests
+
 schemes:
   Halflight:
     build:
@@ -86,5 +151,19 @@ schemes:
       config: Debug
       targets:
         - HalflightTests
+    archive:
+      config: Release
+  Pawlight:
+    build:
+      targets:
+        Pawlight: all
+        PawlightTests: [test]
+    run:
+      config: Debug
+      storeKitConfiguration: StoreKit/Pawlight.storekit
+    test:
+      config: Debug
+      targets:
+        - PawlightTests
     archive:
       config: Release

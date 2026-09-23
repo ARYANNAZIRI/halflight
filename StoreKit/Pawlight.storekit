@@ -1,0 +1,36 @@
+{
+  "identifier" : "7E4F2B1C-9A3D-4C8E-B5F1-2D6A8C0E4B71",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "4.99",
+      "familyShareable" : true,
+      "internalID" : "6746001001",
+      "localizations" : [
+        {
+          "description" : "Every lure and sound, and up to 5 shots per catch.",
+          "displayName" : "Pawlight Pro",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "app.halflight.pawlight.pro",
+      "referenceName" : "Pawlight Pro",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_failTransactionsEnabled" : false,
+    "_storeKitErrors" : [
+
+    ]
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}
