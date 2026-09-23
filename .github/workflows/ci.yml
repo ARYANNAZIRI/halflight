@@ -1,0 +1,105 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build and test (iOS Simulator)
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select newest Xcode on the runner
+        run: |
+          set -euo pipefail
+          ls -d /Applications/Xcode*.app
+          NEWEST=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
+          sudo xcode-select -s "$NEWEST"
+          xcodebuild -version
+          xcrun --sdk iphonesimulator --show-sdk-version
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate project
+        run: xcodegen generate
+
+      - name: Resolve simulator and deployment target
+        id: sim
+        run: |
+          set -euo pipefail
+          SDK=$(xcrun --sdk iphonesimulator --show-sdk-version)
+          # The app targets iOS 27.1. Until the runner ships that SDK, compile against the
+          # newest SDK it has so the code still gets type-checked and unit-tested.
+          if [ "$(printf '%s\n27.1\n' "$SDK" | sort -V | head -1)" = "27.1" ]; then
+            DT=27.1
+          else
+            DT="$SDK"
+            echo "::warning::Runner SDK is iOS $SDK; overriding deployment target to $SDK for this build only."
+          fi
+          echo "deployment_target=$DT" >> "$GITHUB_OUTPUT"
+          xcrun simctl list devices available
+          UDID=$(xcrun simctl list devices available -j | python3 -c '
+          import json,sys
+          data=json.load(sys.stdin)["devices"]
+          picks=[]
+          for runtime, devices in data.items():
+              if "iOS" not in runtime: continue
+              for d in devices:
+                  if d.get("isAvailable") and d["name"].startswith("iPhone"):
+                      picks.append((runtime, d["name"], d["udid"]))
+          picks.sort()
+          print(picks[-1][2] if picks else "")
+          ')
+          if [ -z "$UDID" ]; then echo "No iPhone simulator available"; exit 1; fi
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+          echo "Using simulator $UDID with deployment target $DT"
+
+      - name: Build
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project Halflight.xcodeproj \
+            -scheme Halflight \
+            -destination "platform=iOS Simulator,id=${{ steps.sim.outputs.udid }}" \
+            -configuration Debug \
+            IPHONEOS_DEPLOYMENT_TARGET=${{ steps.sim.outputs.deployment_target }} \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY="" \
+            DEVELOPMENT_TEAM="" \
+            | tee build.log | grep -E "error:|warning: .*(unused|deprecated)|BUILD (SUCCEEDED|FAILED)" || true
+          grep -q "BUILD SUCCEEDED" build.log
+
+      - name: Unit tests
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project Halflight.xcodeproj \
+            -scheme Halflight \
+            -destination "platform=iOS Simulator,id=${{ steps.sim.outputs.udid }}" \
+            -configuration Debug \
+            -only-testing:HalflightTests \
+            IPHONEOS_DEPLOYMENT_TARGET=${{ steps.sim.outputs.deployment_target }} \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY="" \
+            DEVELOPMENT_TEAM="" \
+            | tee test.log | grep -E "error:|Test Suite|Test Case.*(passed|failed)|Executed|✔|✘|TEST (SUCCEEDED|FAILED)" || true
+          grep -q "TEST SUCCEEDED" test.log
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xcodebuild-logs
+          path: |
+            build.log
+            test.log
+          if-no-files-found: ignore
