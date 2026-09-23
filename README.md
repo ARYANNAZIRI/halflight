@@ -109,3 +109,9 @@ but only after the animation has played for 2 seconds, and never twice within 4 
 
 Use: Facing, Look here, Motion Cue, Prompt, Ready, Hold still, Saved to Roll, Facing ON.
 Never: Kid Cue, Duo Preview, Smart Take, Lumen, or Apple product names in the App Store title.
+
+## Shipping
+
+`docs/APP_STORE.md` is the App Store Connect checklist. Listing text lives in `fastlane/metadata/`,
+the privacy manifest in `Halflight/Resources/PrivacyInfo.xcprivacy`, and `fastlane ios beta`
+archives with cloud signing and uploads to TestFlight using an App Store Connect API key.

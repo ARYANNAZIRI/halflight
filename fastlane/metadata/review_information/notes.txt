@@ -1,0 +1,8 @@
+No account or sign-in is needed. Everything runs on device.
+
+How to test:
+1. Allow camera access. Capture opens immediately.
+2. Facing (outer display) needs iPhone Duo with the phone open and the rear camera active. On other devices the Facing tab explains this and offers "Play Motion Cue here".
+3. Roll shows the shots taken in this session. Edit opens a photo in the editor.
+
+Photos permission is add-only and requested only when the user saves a shot.

@@ -1,0 +1,30 @@
+Halflight is a camera for people who photograph people.
+
+Open the phone. The person in front of the camera sees a preview, a motion cue, or a script on the outer screen. You see the viewfinder and the shutter on the inner screen. One session takes you from capture to review to export without leaving the flow.
+
+FACING — THE OUTER SCREEN IS THEIRS
+• Mirror: they see themselves before you shoot, with an optional countdown.
+• Motion Cue: six original, high-contrast animations that pull a child’s eyes to the camera. Tap to switch, or let Mix shuffle them.
+• Prompt: a large scrolling script for talking-head videos. Speed, size, and mirror text from the inner screen.
+• Count: a big countdown, an amber wash, then the shot they just took.
+
+A FAST CAMERA
+• Photo, video, burst, 3s and 10s timers.
+• Main and Ultra Wide, 1x and 2x, pinch to zoom.
+• Tap to focus, exposure, grid, level, flash, torch.
+• HEIF photos, 4K and HDR video where supported.
+• Hardware shutter with the Camera Control or volume buttons.
+
+READY
+Halflight watches for a steady, frontal face and pulses “Ready” so you know when to press. Optional Auto-Capture takes the shot for you, always with a two-second warning.
+
+ROLL AND QUICK EDIT
+• Sessions keep each story together. Filter by photos, videos, or saved.
+• Crop, rotate, exposure, contrast, warmth.
+• Arrow, circle, and pen markup, finger or Apple Pencil.
+• Save to Photos, share, or copy.
+
+PRIVATE BY DESIGN
+No account. No ads. No tracking. Nothing leaves your phone unless you share or save it yourself.
+
+Works with iPhone Duo. On other iPhones, Halflight is a fast camera with a roll and an editor, and Motion Cue plays full-screen.

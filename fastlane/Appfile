@@ -1,0 +1,4 @@
+app_identifier("app.halflight.duo")
+# Set these as environment variables or GitHub secrets; never commit them.
+# apple_id(ENV["APPLE_ID"])
+# team_id(ENV["APPLE_TEAM_ID"])
