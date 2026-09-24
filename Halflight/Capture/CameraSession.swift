@@ -1,4 +1,5 @@
 import AVFoundation
+import ImageIO
 import UIKit
 
 enum CameraError: LocalizedError {
@@ -20,6 +21,13 @@ enum CameraError: LocalizedError {
         case .noPhotoData: String(localized: "The photo came back empty.")
         }
     }
+}
+
+/// Consumes preview frames on the session's frame queue. `FrameTap` (faces) is Halflight's;
+/// other apps built on this session plug in their own analyzer.
+protocol FrameAnalyzer: AVCaptureVideoDataOutputSampleBufferDelegate, Sendable {
+    /// Vision orientation for the active camera. The session keeps it in step with lens switches.
+    var orientation: CGImagePropertyOrientation { get set }
 }
 
 /// Owns the AVCaptureSession. Everything that touches AVFoundation runs on this actor;
@@ -96,7 +104,7 @@ actor CameraSession {
     private var videoInput: AVCaptureDeviceInput?
     private var audioInput: AVCaptureDeviceInput?
     private var rotation: AVCaptureDevice.RotationCoordinator?
-    private var frameTap: FrameTap?
+    private var frameTap: (any FrameAnalyzer)?
     private var photoProcessors: [Int64: PhotoCaptureProcessor] = [:]
     private var recordingDelegate: MovieRecordingDelegate?
     private var observers: [any NSObjectProtocol] = []
@@ -498,15 +506,19 @@ actor CameraSession {
     // MARK: Frames for Still Hint
 
     func setFrameTap(_ handler: (@Sendable (FaceSample) -> Void)?) {
-        guard let handler else {
+        setFrameAnalyzer(handler.map { FrameTap(handler: $0) })
+    }
+
+    /// Installs any frame analyzer (nil removes it). Only one runs at a time.
+    func setFrameAnalyzer(_ analyzer: (any FrameAnalyzer)?) {
+        guard let analyzer else {
             frameOutput.setSampleBufferDelegate(nil, queue: nil)
             frameTap = nil
             return
         }
-        let tap = FrameTap(handler: handler)
-        tap.orientation = videoInput?.device.position == .front ? .leftMirrored : .right
-        frameTap = tap
-        frameOutput.setSampleBufferDelegate(tap, queue: frameQueue)
+        analyzer.orientation = videoInput?.device.position == .front ? .leftMirrored : .right
+        frameTap = analyzer
+        frameOutput.setSampleBufferDelegate(analyzer, queue: frameQueue)
     }
 
     // MARK: Interruptions

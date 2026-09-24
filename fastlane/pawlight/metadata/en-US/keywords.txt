@@ -1,0 +1,1 @@
+pet,dog,cat,puppy,kitten,photo,treat,squeaky,portrait,foldable,duo,animal

@@ -1,11 +1,11 @@
-Halflight is a camera for people who photograph people.
+Halflight is a camera for people who film and photograph people.
 
-Open the phone. The person in front of the camera sees a preview, a motion cue, or a script on the outer screen. You see the viewfinder and the shutter on the inner screen. One session takes you from capture to review to export without leaving the flow.
+Open the phone. Your script scrolls on the outer screen, right under the lens, while you film from the inner screen. Or give the person in front of the camera a preview, a motion cue, or a countdown instead. One session takes you from capture to review to export without leaving the flow.
 
 FACING — THE OUTER SCREEN IS THEIRS
+• Prompt: a large scrolling script for talking-head videos, interviews, and pieces to camera. Speed, size, and mirror text from the inner screen.
 • Mirror: they see themselves before you shoot, with an optional countdown.
 • Motion Cue: six original, high-contrast animations that pull a child’s eyes to the camera. Tap to switch, or let Mix shuffle them.
-• Prompt: a large scrolling script for talking-head videos. Speed, size, and mirror text from the inner screen.
 • Count: a big countdown, an amber wash, then the shot they just took.
 
 A FAST CAMERA

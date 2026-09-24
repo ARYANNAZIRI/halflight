@@ -11,6 +11,12 @@ other iPhone it is still a fast camera with a roll, a quick editor, and full-scr
 - Minimum: iOS 27.1. Built with Xcode 27.1 and the iOS 27.1 SDK
 - No account, no analytics SDK, no uploads. Everything stays on the phone.
 
+## Pawlight (sister app)
+
+This repo also builds **Pawlight**, a pet camera for iPhone Duo that reuses Halflight's camera
+core: a lure on the outer display, sounds to make pets look, and auto-capture when a cat or dog
+faces the lens. Scheme `Pawlight`. See [`docs/PAWLIGHT.md`](docs/PAWLIGHT.md).
+
 ## Build
 
 ```sh

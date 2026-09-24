@@ -15,6 +15,11 @@ any other product. Read `README.md` first, then `TESTPLAN.md`.
   Never use Kid Cue, Duo Preview, Smart Take, Lumen, or Apple product names as feature names.
 - No force-unwraps on device or camera queries.
 
+- The repo also holds **Pawlight** (`Pawlight/`, `PawlightTests/`, `docs/PAWLIGHT.md`). It compiles
+  some Halflight files directly (listed in `project.yml`), so keep those files free of
+  Halflight-only types (`AppState`, `CaptureModel`, `SettingsStore`). Pawlight's Duo API use lives
+  in `Pawlight/DuoBridge/` under the same flag.
+
 ## Workflow
 
 - Project file is generated: `xcodegen generate` (never hand-edit a `.xcodeproj`).

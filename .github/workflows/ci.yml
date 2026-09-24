@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, "claude/**"]
   pull_request:
 
 concurrency:
@@ -102,6 +102,37 @@ jobs:
             | tee test.log | grep -E "error:|Test Suite|Test Case.*(passed|failed)|Executed|✔|✘|TEST (SUCCEEDED|FAILED)" || true
           grep -q "TEST SUCCEEDED" test.log
 
+      - name: Build Pawlight
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project Halflight.xcodeproj \
+            -scheme Pawlight \
+            -destination "platform=iOS Simulator,id=${{ steps.sim.outputs.udid }}" \
+            -configuration Debug \
+            IPHONEOS_DEPLOYMENT_TARGET=${{ steps.sim.outputs.deployment_target }} \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY="" \
+            DEVELOPMENT_TEAM="" \
+            | tee pawlight-build.log | grep -E "error:|warning: .*(unused|deprecated)|BUILD (SUCCEEDED|FAILED)" || true
+          grep -q "BUILD SUCCEEDED" pawlight-build.log
+
+      - name: Pawlight unit tests
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project Halflight.xcodeproj \
+            -scheme Pawlight \
+            -destination "platform=iOS Simulator,id=${{ steps.sim.outputs.udid }}" \
+            -configuration Debug \
+            -only-testing:PawlightTests \
+            IPHONEOS_DEPLOYMENT_TARGET=${{ steps.sim.outputs.deployment_target }} \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY="" \
+            DEVELOPMENT_TEAM="" \
+            | tee pawlight-test.log | grep -E "error:|Test Suite|Test Case.*(passed|failed)|Executed|✔|✘|TEST (SUCCEEDED|FAILED)" || true
+          grep -q "TEST SUCCEEDED" pawlight-test.log
+
       - name: Upload logs
         if: always()
         uses: actions/upload-artifact@v4
@@ -110,4 +141,6 @@ jobs:
           path: |
             build.log
             test.log
+            pawlight-build.log
+            pawlight-test.log
           if-no-files-found: ignore

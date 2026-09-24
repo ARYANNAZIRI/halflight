@@ -67,7 +67,7 @@ struct StillHintEvaluator: Sendable {
 }
 
 /// Runs Vision face detection on a throttled stream of preview frames, off the main thread.
-final class FrameTap: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate, @unchecked Sendable {
+final class FrameTap: NSObject, FrameAnalyzer, @unchecked Sendable {
     private let handler: @Sendable (FaceSample) -> Void
     private let request = VNDetectFaceRectanglesRequest()
     private var lastTime: CFTimeInterval = 0
